@@ -15,7 +15,6 @@ func New(text string) error {
 }
 
 func info() BattlesnakeInfoResponse {
-	log.Println("INFO:")
 	return BattlesnakeInfoResponse{
 		APIVersion: "1",
 		Author:     "Marie Treschow",
@@ -173,13 +172,13 @@ func makeRange(max int) []int {
 	return a
 }
 
-func amountOfMovesCollideWithMyself(move string, myHead Coord, lengthToNextMove int, mybody []Coord) bool {
+func movesToCollideWithMyself(move string, myHead Coord, lengthToNextMove int, mybody []Coord) bool {
 	coordinate := nextCoordinate(move, myHead, lengthToNextMove)
 	moves := makeRange(lengthToNextMove)
 	return collideWithMyself(move, coordinate, mybody, moves)
 }
 
-func findMoveWithMostSpace(myHead Coord, safeMoves []string, mybody []Coord, boardWidth int, boardHeight int) string {
+func moveWithLongestDistance(myHead Coord, safeMoves []string, mybody []Coord, boardWidth int, boardHeight int) string {
 	firstMove := safeMoves[0]
 	checkMovesDistanceToWall := make(map[string]float64)
 
@@ -197,10 +196,10 @@ func findMoveWithMostSpace(myHead Coord, safeMoves []string, mybody []Coord, boa
 		}
 	}
 	bestMove := getLongestDistance(checkMovesDistanceToWall)
-
-	collidWithMyselfTwoMoves := amountOfMovesCollideWithMyself(bestMove, myHead, 2, mybody)
-	collidWithMyselfThreeMoves := amountOfMovesCollideWithMyself(bestMove, myHead, 3, mybody)
-
+	twoMoves := 2
+	collidWithMyselfTwoMoves := movesToCollideWithMyself(bestMove, myHead, twoMoves, mybody)
+	threeMoves := 3
+	collidWithMyselfThreeMoves := movesToCollideWithMyself(bestMove, myHead, threeMoves, mybody)
 	if !collidWithMyselfThreeMoves && !collidWithMyselfTwoMoves {
 		return bestMove
 	}
@@ -246,17 +245,17 @@ func move(state GameState) BattlesnakeMoveResponse {
 			nextMove = "up"
 			log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
 		} else {
-			nextMove = findMoveWithMostSpace(myHead, safeMoves, mybody, boardWidth, boardHeight)
+			nextMove = moveWithLongestDistance(myHead, safeMoves, mybody, boardWidth, boardHeight)
 		}
 	} else {
 		food := state.Board.Food
 		nextMoveFood := shortestMoveToFood(myHead, food, safeMoves)
-		nextMoveSpace := findMoveWithMostSpace(myHead, safeMoves, mybody, boardWidth, boardHeight)
+		nextMoveSpace := moveWithLongestDistance(myHead, safeMoves, mybody, boardWidth, boardHeight)
 
 		if nextMoveFood == nextMoveSpace || health < 10 {
 			nextMove = nextMoveFood
 		} else {
-			nextMove = findMoveWithMostSpace(myHead, safeMoves, mybody, boardWidth, boardHeight)
+			nextMove = moveWithLongestDistance(myHead, safeMoves, mybody, boardWidth, boardHeight)
 		}
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
 	}

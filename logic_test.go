@@ -262,7 +262,6 @@ func TestFindMostSpaceToMove(t *testing.T) {
 	expectedResult := "left"
 
 	validate := getLongestDistance(testMap)
-	log.Println(validate)
 	assert.Equal(t, validate, expectedResult)
 }
 
@@ -272,4 +271,18 @@ func TestFindShortestWay(t *testing.T) {
 
 	validate := getShortestDistance(testMap)
 	assert.Equal(t, validate, expectedResult)
+}
+
+func TestMoveWithLongestDistance(t *testing.T) {
+	safeMoves := []string{"up", "left"}
+	boardHeight, boardWidth := 11, 11
+	snake := []Coord{{X: 3, Y: 3}, {X: 3, Y: 2}, {X: 3, Y: 1}}
+	me := Battlesnake{
+		Head: snake[0],
+		Body: snake,
+	}
+	expectedResult := "up"
+	validate := moveWithLongestDistance(me.Head, safeMoves, me.Body, boardHeight, boardWidth)
+	assert.Equal(t, validate, expectedResult)
+
 }
